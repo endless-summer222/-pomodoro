@@ -55,7 +55,7 @@ export default function TomatoTimer({ onCollapse }: TomatoTimerProps) {
 
   return (
     <motion.div
-      className="drag-region relative flex flex-col items-center justify-center w-full h-full gap-2.5 p-4 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl"
+      className="drag-region relative flex flex-col items-center justify-center w-full h-full gap-2.5 p-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-2xl"
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5 }}
@@ -87,7 +87,7 @@ export default function TomatoTimer({ onCollapse }: TomatoTimerProps) {
         {/* Center time */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <motion.span
-            className="text-4xl font-bold tabular-nums text-gray-800 tracking-tight"
+            className="text-4xl font-bold tabular-nums text-gray-800 dark:text-white tracking-tight"
             key={timeRemaining}
             initial={{ opacity: 0.6, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -105,7 +105,7 @@ export default function TomatoTimer({ onCollapse }: TomatoTimerProps) {
       <div className="flex items-center gap-3 no-drag">
         {phase !== "idle" && (
           <motion.button
-            className="w-8 h-8 rounded-full bg-white/50 backdrop-blur text-gray-400 flex items-center justify-center hover:bg-white/70 transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full bg-white/50 dark:bg-gray-800/50 backdrop-blur text-gray-400 dark:text-gray-500 flex items-center justify-center hover:bg-white/70 dark:hover:bg-gray-800/70 transition-colors shadow-sm"
             onClick={skip} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} title="跳过"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -133,7 +133,7 @@ export default function TomatoTimer({ onCollapse }: TomatoTimerProps) {
         </motion.button>
 
         <motion.button
-          className="w-8 h-8 rounded-full bg-white/50 backdrop-blur text-gray-400 flex items-center justify-center hover:bg-white/70 transition-colors shadow-sm"
+          className="w-8 h-8 rounded-full bg-white/50 dark:bg-gray-800/50 backdrop-blur text-gray-400 dark:text-gray-500 flex items-center justify-center hover:bg-white/70 dark:hover:bg-gray-800/70 transition-colors shadow-sm"
           onClick={onCollapse} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} title="收起"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">

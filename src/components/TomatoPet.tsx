@@ -2,14 +2,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTimerStore } from "../stores/timerStore";
+import { useSettingsStore } from "../stores/settingsStore";
 
 interface TomatoPetProps {
-  onClick: () => void;
+  onStartFocus: () => void;
+  onOpenSettings: () => void;
+  onOpenPersonalization: () => void;
 }
 
-export default function TomatoPet({ onClick }: TomatoPetProps) {
+export default function TomatoPet({ onStartFocus, onOpenSettings, onOpenPersonalization }: TomatoPetProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { phase, completedPomodoros } = useTimerStore();
+  const { tomatoColor, tomatoSize } = useSettingsStore();
   const isWorking = phase === "focus";
 
   const handleTomatoClick = () => {
@@ -36,7 +40,7 @@ export default function TomatoPet({ onClick }: TomatoPetProps) {
         whileTap={{ scale: 0.95 }}
       >
         <svg
-          width="80" height="88"
+          width={tomatoSize} height={tomatoSize * 1.1}
           viewBox="0 0 100 108"
           fill="none" xmlns="http://www.w3.org/2000/svg"
           className="drop-shadow-lg"
@@ -46,8 +50,8 @@ export default function TomatoPet({ onClick }: TomatoPetProps) {
           {/* Body */}
           <motion.ellipse
             cx="50" cy="56" rx="42" ry="40"
-            fill={isWorking ? "#EF4444" : "#FF6B6B"}
-            animate={isWorking ? { fill: "#EF4444" } : { fill: "#FF6B6B" }}
+            fill={isWorking ? "#EF4444" : tomatoColor}
+            animate={isWorking ? { fill: "#EF4444" } : { fill: tomatoColor }}
           />
           {/* Lighter belly */}
           <ellipse cx="38" cy="62" rx="16" ry="14" fill="#FF888850" />
@@ -110,26 +114,26 @@ export default function TomatoPet({ onClick }: TomatoPetProps) {
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
             <button
-              onClick={(e) => { e.stopPropagation(); onClick(); setMenuOpen(false); }}
+              onClick={(e) => { e.stopPropagation(); onStartFocus(); setMenuOpen(false); }}
               className="px-4 py-1.5 text-xs font-medium text-white bg-red-400 rounded-full hover:bg-red-500 transition-colors shadow-md whitespace-nowrap"
             >
               开始专注
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
-              className="px-4 py-1.5 text-xs font-medium text-gray-600 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm whitespace-nowrap"
+              onClick={(e) => { e.stopPropagation(); onOpenSettings(); setMenuOpen(false); }}
+              className="px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
             >
               设置
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
-              className="px-4 py-1.5 text-xs font-medium text-gray-600 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm whitespace-nowrap"
+              onClick={(e) => { e.stopPropagation(); onOpenPersonalization(); setMenuOpen(false); }}
+              className="px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
             >
               个性化
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleQuit(); }}
-              className="px-4 py-1.5 text-xs font-medium text-gray-400 bg-white/60 backdrop-blur rounded-full hover:bg-white/80 hover:text-red-400 transition-colors shadow-sm whitespace-nowrap"
+              className="px-4 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-full hover:bg-white dark:hover:bg-gray-700 hover:text-red-400 transition-colors shadow-sm whitespace-nowrap"
             >
               退出
             </button>

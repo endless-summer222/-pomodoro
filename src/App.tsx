@@ -3,9 +3,32 @@ import { getCurrentWindow, PhysicalPosition, PhysicalSize } from "@tauri-apps/ap
 import { AnimatePresence } from "framer-motion";
 import TomatoPet from "./components/TomatoPet";
 import TomatoTimer from "./components/TomatoTimer";
+import SettingsPanel from "./components/SettingsPanel";
+import { useSettingsStore } from "./stores/settingsStore";
 
-const PET_SIZE = { width: 380, height: 220 };
-const TIMER_SIZE = { width: 400, height: 520 };
+function applyTheme(theme: "light" | "dark" | "system") {
+  const root = document.documentElement;
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (isDark) {
+    root.classList.add("dark");
+  } else {
+    root.classList.remove("dark");
+  }
+}
+
+const PANEL_SIZE = { width: 400, height: 520 };
+
+function getPetSize(tomatoSize: number) {
+  const svgHeight = tomatoSize * 1.1;
+  const w = Math.max(tomatoSize + 300, 370);
+  const h = svgHeight + 120;
+  return { width: w, height: h };
+}
+
+type ViewState = "pet" | "timer" | "settings" | "personalization";
 
 function loadPosition(): { x: number; y: number } | null {
   try {
@@ -22,8 +45,9 @@ function savePosition(x: number, y: number): void {
 }
 
 export default function App() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [view, setView] = useState<ViewState>("pet");
   const [initialized, setInitialized] = useState(false);
+  const tomatoSize = useSettingsStore((s) => s.tomatoSize);
 
   // Initialize window on startup
   useEffect(() => {
@@ -33,28 +57,19 @@ export default function App() {
       try {
         const win = getCurrentWindow();
         const saved = loadPosition();
-
         if (saved) {
           try {
             await win.setPosition(new PhysicalPosition(saved.x, saved.y));
-          } catch {
-            // Position set failed, continue with default
-          }
+          } catch {}
         }
-
-        // Set initial pet size
+        const petSize = getPetSize(tomatoSize);
         try {
-          await win.setSize(new PhysicalSize(PET_SIZE.width, PET_SIZE.height));
-        } catch {
-          // Size set failed, continue
-        }
+          await win.setSize(new PhysicalSize(petSize.width, petSize.height));
+        } catch {}
       } catch (err) {
         console.error("Window init error:", err);
       }
-
-      if (!cancelled) {
-        setInitialized(true);
-      }
+      if (!cancelled) setInitialized(true);
     }
 
     init();
@@ -65,73 +80,76 @@ export default function App() {
   useEffect(() => {
     const win = getCurrentWindow();
     let unlisten: (() => void) | undefined;
-
     async function setup() {
       try {
         unlisten = await win.onMoved((event) => {
           savePosition(event.payload.x, event.payload.y);
         });
-      } catch (err) {
-        console.error("onMoved error:", err);
-      }
+      } catch {}
     }
     setup();
-
-    return () => {
-      if (unlisten) unlisten();
-    };
+    return () => { if (unlisten) unlisten(); };
   }, []);
 
-  // Collapse on losing focus
+  // Collapse on losing focus (only when in timer view)
   useEffect(() => {
-    if (!isExpanded) return;
-
+    if (view !== "timer") return;
     const win = getCurrentWindow();
     let unlisten: (() => void) | undefined;
-
     async function setup() {
       try {
-        unlisten = await win.onFocusChanged((event) => {
+        unlisten = await win.onFocusChanged(async (event) => {
           if (!event.payload) {
-            setIsExpanded(false);
+            const petSize = getPetSize(tomatoSize);
+            await win.setSize(new PhysicalSize(petSize.width, petSize.height));
+            setView("pet");
           }
         });
-      } catch (err) {
-        console.error("onFocusChanged error:", err);
-      }
+      } catch {}
     }
     setup();
+    return () => { if (unlisten) unlisten(); };
+  }, [view, tomatoSize]);
 
-    return () => {
-      if (unlisten) unlisten();
-    };
-  }, [isExpanded]);
-
-  // Resize window when expanding/collapsing
-  const handleExpand = useCallback(async () => {
+  // Switch views — resize window first, then change view
+  const switchToPanel = useCallback(async (v: ViewState) => {
     try {
       const win = getCurrentWindow();
-      await win.setSize(new PhysicalSize(TIMER_SIZE.width, TIMER_SIZE.height));
-    } catch (err) {
-      console.error("Expand resize error:", err);
-    }
-    setIsExpanded(true);
+      await win.setSize(new PhysicalSize(PANEL_SIZE.width, PANEL_SIZE.height));
+    } catch {}
+    setView(v);
   }, []);
 
-  const handleCollapse = useCallback(async () => {
-    setIsExpanded(false);
-    setTimeout(async () => {
-      try {
-        const win = getCurrentWindow();
-        await win.setSize(new PhysicalSize(PET_SIZE.width, PET_SIZE.height));
-      } catch (err) {
-        console.error("Collapse resize error:", err);
-      }
-    }, 150);
+  const switchToTimer = useCallback(async () => {
+    try {
+      const win = getCurrentWindow();
+      await win.setSize(new PhysicalSize(PANEL_SIZE.width, PANEL_SIZE.height));
+    } catch {}
+    setView("timer");
   }, []);
+
+  const switchToPet = useCallback(async () => {
+    try {
+      const win = getCurrentWindow();
+      const petSize = getPetSize(tomatoSize);
+      await win.setSize(new PhysicalSize(petSize.width, petSize.height));
+    } catch {}
+    setView("pet");
+  }, [tomatoSize]);
+
+  // Apply theme
+  const theme = useSettingsStore((s) => s.theme);
+  useEffect(() => {
+    applyTheme(theme);
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyTheme(theme);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [theme]);
+
+  const handleClosePanel = useCallback(() => switchToPet(), [switchToPet]);
 
   if (!initialized) {
-    // Show a minimal loading indicator instead of nothing
     return (
       <div className="w-full h-full flex items-center justify-center bg-transparent rounded-2xl">
         <div className="text-2xl">🍅</div>
@@ -142,10 +160,21 @@ export default function App() {
   return (
     <div className="w-full h-full flex items-center justify-center bg-transparent rounded-2xl">
       <AnimatePresence mode="wait">
-        {isExpanded ? (
-          <TomatoTimer key="timer" onCollapse={handleCollapse} />
+        {view === "settings" || view === "personalization" ? (
+          <SettingsPanel
+            key="settings"
+            onClose={handleClosePanel}
+            initialTab={view === "settings" ? "settings" : "personalization"}
+          />
+        ) : view === "timer" ? (
+          <TomatoTimer key="timer" onCollapse={switchToPet} />
         ) : (
-          <TomatoPet key="pet" onClick={handleExpand} />
+          <TomatoPet
+            key="pet"
+            onStartFocus={switchToTimer}
+            onOpenSettings={() => switchToPanel("settings")}
+            onOpenPersonalization={() => switchToPanel("personalization")}
+          />
         )}
       </AnimatePresence>
     </div>

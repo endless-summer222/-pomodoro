@@ -1,0 +1,27 @@
+<svg width="80" height="88" viewBox="0 0 100 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow -->
+  <ellipse cx="50" cy="102" rx="32" ry="4" fill="#00000020" />
+  <!-- Body -->
+  <ellipse cx="50" cy="56" rx="42" ry="40" fill="#FF6B6B" />
+  <!-- Lighter belly -->
+  <ellipse cx="38" cy="62" rx="16" ry="14" fill="#FF888850" />
+  <!-- Highlight -->
+  <ellipse cx="32" cy="42" rx="14" ry="9" fill="#FF909060" />
+  <!-- Stem -->
+  <path d="M50 18 Q47 10 54 6" stroke="#4CAF50" stroke-width="5" fill="none" stroke-linecap="round" />
+  <!-- Leaf left -->
+  <ellipse cx="60" cy="14" rx="12" ry="5" fill="#66BB6A" transform="rotate(-25 60 14)" />
+  <!-- Leaf right -->
+  <ellipse cx="44" cy="14" rx="10" ry="4" fill="#81C784" transform="rotate(15 44 14)" />
+  <!-- Eyes -->
+  <circle cx="38" cy="52" r="4" fill="#333" />
+  <circle cx="62" cy="52" r="4" fill="#333" />
+  <!-- Eye sparkle -->
+  <circle cx="39.5" cy="50.5" r="1.5" fill="white" />
+  <circle cx="63.5" cy="50.5" r="1.5" fill="white" />
+  <!-- Smile -->
+  <path d="M42 62 Q50 71 58 62" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round" />
+  <!-- Cheeks -->
+  <circle cx="26" cy="58" r="5" fill="#FF6B6B40" />
+  <circle cx="74" cy="58" r="5" fill="#FF6B6B40" />
+</svg>
