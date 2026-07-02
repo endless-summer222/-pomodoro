@@ -3,6 +3,8 @@
 > A desktop pet pomodoro timer — A tiny tomato that lives on your desktop and helps you focus.  
 > 桌面宠物番茄钟 — 一颗住在你桌面上的小番茄，帮你专注工作。
 
+[![GitHub](https://img.shields.io/badge/GitHub-endless--summer222%2F--pomodoro-181717?logo=github)](https://github.com/endless-summer222/-pomodoro)
+
 ---
 
 ## 🚀 Quick Start | 快速开始
@@ -24,7 +26,7 @@
 # 环境要求 | Prerequisites
 # Node.js v18+ · pnpm · Rust (latest stable) · Windows WebView2 (built-in on Win11)
 
-git clone <repo-url>
+git clone https://github.com/endless-summer222/-pomodoro.git
 cd pomodoro-pet
 pnpm install
 pnpm tauri dev        # 开发模式 | Dev mode
