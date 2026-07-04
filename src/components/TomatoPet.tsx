@@ -50,8 +50,8 @@ export default function TomatoPet({ onStartFocus, onOpenSettings, onOpenPersonal
           {/* Body */}
           <motion.ellipse
             cx="50" cy="56" rx="42" ry="40"
-            fill={isWorking ? "#EF4444" : tomatoColor}
-            animate={isWorking ? { fill: "#EF4444" } : { fill: tomatoColor }}
+            fill={tomatoColor}
+            animate={{ fill: tomatoColor }}
           />
           {/* Lighter belly */}
           <ellipse cx="38" cy="62" rx="16" ry="14" fill="#FF888850" />

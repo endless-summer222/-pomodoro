@@ -35,10 +35,7 @@ export function useTimer() {
 
   // Handle timer completion
   useEffect(() => {
-    if (isRunning && timeRemaining <= 0 && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-
+    if (isRunning && timeRemaining <= 0) {
       if (phase === "focus") {
         playEndSound();
         sendNotification("🍅 番茄完成！", "专注时间结束，休息一下吧~");
@@ -56,7 +53,7 @@ export function useTimer() {
     if (!granted) {
       await requestNotificationPermission();
     }
-    setPhase("focus");
+    setPhase("focus", true);
     setIsRunning(true);
   };
 

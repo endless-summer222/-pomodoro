@@ -5,6 +5,7 @@ import TomatoPet from "./components/TomatoPet";
 import TomatoTimer from "./components/TomatoTimer";
 import SettingsPanel from "./components/SettingsPanel";
 import { useSettingsStore } from "./stores/settingsStore";
+import { useTimer } from "./hooks/useTimer";
 
 function applyTheme(theme: "light" | "dark" | "system") {
   const root = document.documentElement;
@@ -48,6 +49,7 @@ export default function App() {
   const [view, setView] = useState<ViewState>("pet");
   const [initialized, setInitialized] = useState(false);
   const tomatoSize = useSettingsStore((s) => s.tomatoSize);
+  const timerActions = useTimer(); // Keep timer alive regardless of view
 
   // Initialize window on startup
   useEffect(() => {
@@ -167,7 +169,7 @@ export default function App() {
             initialTab={view === "settings" ? "settings" : "personalization"}
           />
         ) : view === "timer" ? (
-          <TomatoTimer key="timer" onCollapse={switchToPet} />
+          <TomatoTimer key="timer" onCollapse={switchToPet} timerActions={timerActions} />
         ) : (
           <TomatoPet
             key="pet"

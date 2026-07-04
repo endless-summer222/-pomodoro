@@ -17,7 +17,7 @@ export interface TimerState {
   longBreakInterval: number; // after N pomodoros
 
   // Actions
-  setPhase: (phase: TimerPhase) => void;
+  setPhase: (phase: TimerPhase, keepRunning?: boolean) => void;
   setTimeRemaining: (seconds: number) => void;
   setTotalDuration: (seconds: number) => void;
   setIsRunning: (running: boolean) => void;
@@ -62,10 +62,15 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   longBreakDuration: DEFAULT_LONG_BREAK,
   longBreakInterval: DEFAULT_LONG_INTERVAL,
 
-  setPhase: (phase) => {
+  setPhase: (phase, keepRunning = false) => {
     const state = get();
     const duration = getPhaseDuration(phase, state);
-    set({ phase, timeRemaining: duration, totalDuration: duration, isRunning: false });
+    set({
+      phase,
+      timeRemaining: duration,
+      totalDuration: duration,
+      ...(keepRunning ? {} : { isRunning: false }),
+    });
   },
 
   setTimeRemaining: (seconds) => set({ timeRemaining: seconds }),
@@ -80,21 +85,24 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   },
 
   completePomodoro: () => {
-    const { completedPomodoros, longBreakInterval, phase } = get();
-    if (phase !== "focus") return;
+    const state = get();
+    if (state.phase !== "focus") return;
 
-    const newCount = completedPomodoros + 1;
-    const isLongBreak = newCount % longBreakInterval === 0;
+    const newCount = state.completedPomodoros + 1;
+    const isLongBreak = newCount % state.longBreakInterval === 0;
+    const nextPhase = isLongBreak ? "long_break" : "short_break";
+    const duration = getPhaseDuration(nextPhase, state);
 
+    // Single atomic set — avoid intermediate state where phase changed
+    // but isRunning is still true and timeRemaining is still 0,
+    // which would trigger the completion effect's else-branch prematurely.
     set({
       completedPomodoros: newCount,
-      phase: isLongBreak ? "long_break" : "short_break",
+      phase: nextPhase,
+      timeRemaining: duration,
+      totalDuration: duration,
+      isRunning: false,
     });
-
-    // Set the new phase duration
-    const state = get();
-    const duration = getPhaseDuration(state.phase, state);
-    set({ timeRemaining: duration, totalDuration: duration, isRunning: false });
   },
 
   reset: () => {

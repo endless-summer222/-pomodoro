@@ -1,10 +1,17 @@
 import { motion } from "framer-motion";
 import { useTimerStore } from "../stores/timerStore";
-import { useTimer } from "../hooks/useTimer";
 import { playStartSound } from "../lib/sound";
+
+interface TimerActions {
+  startFocus: () => Promise<void>;
+  togglePause: () => void;
+  skip: () => void;
+  startBreak: () => void;
+}
 
 interface TomatoTimerProps {
   onCollapse: () => void;
+  timerActions: TimerActions;
 }
 
 function formatTime(seconds: number): string {
@@ -31,9 +38,9 @@ function getPhaseColor(phase: string): string {
   }
 }
 
-export default function TomatoTimer({ onCollapse }: TomatoTimerProps) {
+export default function TomatoTimer({ onCollapse, timerActions }: TomatoTimerProps) {
   const { phase, timeRemaining, totalDuration, isRunning, completedPomodoros } = useTimerStore();
-  const { startFocus, togglePause, skip, startBreak } = useTimer();
+  const { startFocus, togglePause, skip, startBreak } = timerActions;
 
   const progress = totalDuration > 0 ? (totalDuration - timeRemaining) / totalDuration : 0;
   const color = getPhaseColor(phase);
