@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTimerStore } from "../stores/timerStore";
+import { useSettingsStore } from "../stores/settingsStore";
 import { sendNotification, isNotificationPermissionGranted, requestNotificationPermission } from "../lib/notifications";
 import { playEndSound } from "../lib/sound";
 
@@ -15,11 +16,14 @@ export function useTimer() {
     setPhase,
   } = useTimerStore();
 
+  const autoStartBreak = useSettingsStore((s) => s.autoStartBreak);
+  const autoStartFocus = useSettingsStore((s) => s.autoStartFocus);
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Tick every second
+  // Tick every second — stable interval, only depend on isRunning
   useEffect(() => {
-    if (isRunning && timeRemaining > 0) {
+    if (isRunning) {
       intervalRef.current = setInterval(() => {
         tick();
       }, 1000);
@@ -31,7 +35,7 @@ export function useTimer() {
         intervalRef.current = null;
       }
     };
-  }, [isRunning, timeRemaining, tick]);
+  }, [isRunning, tick]);
 
   // Handle timer completion
   useEffect(() => {
@@ -40,13 +44,21 @@ export function useTimer() {
         playEndSound();
         sendNotification("🍅 番茄完成！", "专注时间结束，休息一下吧~");
         completePomodoro();
+        if (autoStartBreak) {
+          setIsRunning(true);
+        }
       } else {
         playEndSound();
         sendNotification("☕ 休息结束", "准备好开始下一个番茄了吗？");
-        setPhase("idle");
+        if (autoStartFocus) {
+          setPhase("focus");
+          setIsRunning(true);
+        } else {
+          setPhase("idle");
+        }
       }
     }
-  }, [timeRemaining, isRunning, phase, completePomodoro, setPhase]);
+  }, [timeRemaining, isRunning, phase, completePomodoro, setPhase, setIsRunning, autoStartBreak, autoStartFocus]);
 
   const startFocus = async () => {
     const granted = await isNotificationPermissionGranted();

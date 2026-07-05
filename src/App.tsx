@@ -93,9 +93,10 @@ export default function App() {
     return () => { if (unlisten) unlisten(); };
   }, []);
 
-  // Collapse on losing focus (only when in timer view)
+  // Collapse on losing focus (only when in timer view and collapseOnBlur enabled)
+  const collapseOnBlur = useSettingsStore((s) => s.collapseOnBlur);
   useEffect(() => {
-    if (view !== "timer") return;
+    if (view !== "timer" || !collapseOnBlur) return;
     const win = getCurrentWindow();
     let unlisten: (() => void) | undefined;
     async function setup() {
@@ -111,7 +112,16 @@ export default function App() {
     }
     setup();
     return () => { if (unlisten) unlisten(); };
-  }, [view, tomatoSize]);
+  }, [view, tomatoSize, collapseOnBlur]);
+
+  // Keep window always on top
+  const alwaysOnTop = useSettingsStore((s) => s.alwaysOnTop);
+  useEffect(() => {
+    const win = getCurrentWindow();
+    try {
+      win.setAlwaysOnTop(alwaysOnTop);
+    } catch {}
+  }, [alwaysOnTop]);
 
   // Switch views — resize window first, then change view
   const switchToPanel = useCallback(async (v: ViewState) => {
